@@ -115,7 +115,7 @@ int main()
 		//发送响应头
 		string response =
 			"HTTP/1.1 200 OK\r\n"
-			"Content-Type: text/html; charset=gbk\r\n"
+			"Content-Type: text/html; charset=utf8\r\n"
 			"Connection: close\r\n"
 			"\r\n";
 		send(clientSock, response.c_str(), response.length(), 0);
