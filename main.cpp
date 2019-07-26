@@ -31,6 +31,7 @@ public:
 
 #include <iostream>
 #include <string>
+#define BUFF_SIZE 1024
 using namespace std;
 
 //处理URL
