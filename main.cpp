@@ -1,4 +1,4 @@
-//·ÇUnixÏµÍ³
+//éUnixç³»ç»Ÿ
 #if defined(_MSC_VER) || defined(__MINGW32__) || defined(WIN32)
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -10,17 +10,17 @@ class WinSockInit
 	WSADATA _wsa;
 public:
 	WinSockInit()
-	{  //·ÖÅäÌ×½Ó×Ö°æ±¾ĞÅÏ¢2.0£¬WSADATA±äÁ¿µØÖ·
+	{  //åˆ†é…å¥—æ¥å­—ç‰ˆæœ¬ä¿¡æ¯2.0ï¼ŒWSADATAå˜é‡åœ°å€
 		WSAStartup(MAKEWORD(2, 0), &_wsa);
 
 	}
 	~WinSockInit()
 	{
-		WSACleanup();//¹¦ÄÜÊÇÖÕÖ¹Winsock 2 DLL (Ws2_32.dll) µÄÊ¹ÓÃ
+		WSACleanup();//åŠŸèƒ½æ˜¯ç»ˆæ­¢Winsock 2 DLL (Ws2_32.dll) çš„ä½¿ç”¨
 	}
 };
 
-//UnixÏµÍ³
+//Unixç³»ç»Ÿ
 #else
 #include <unistd.h>
 #include <sys/types.h>
@@ -33,26 +33,26 @@ public:
 #include <string>
 using namespace std;
 
-//´¦ÀíURL
+//å¤„ç†URL
 void UrlRouter(int clientSock, string const& url)
 {
 	string hint;
 	if (url == "/")
 	{
-		cout << url << " ÊÕµ½ĞÅÏ¢\n";
+		cout << url << " æ”¶åˆ°ä¿¡æ¯\n";
 		hint = "haha, this is home page!";
 		send(clientSock, hint.c_str(), hint.length(), 0);
 	}
 	else if (url == "/hello")
 	{
-		cout << url << " ÊÕµ½ĞÅÏ¢\n";
-		hint = "ÄãºÃ!";
+		cout << url << " æ”¶åˆ°ä¿¡æ¯\n";
+		hint = "ä½ å¥½!";
 		send(clientSock, hint.c_str(), hint.length(), 0);
 	}
 	else
 	{
-		cout << url << " ÊÕµ½ĞÅÏ¢\n";
-		hint = "Î´¶¨ÒåURL!";
+		cout << url << " æ”¶åˆ°ä¿¡æ¯\n";
+		hint = "æœªå®šä¹‰URL!";
 		send(clientSock, hint.c_str(), hint.length(), 0);
 	}
 
@@ -61,57 +61,70 @@ void UrlRouter(int clientSock, string const& url)
 int main()
 {
 #if defined(_MSC_VER) || defined(__MINGW32__) || defined(WIN32)
-	WinSockInit socklibInit;//Èç¹ûÎªWindowsÏµÍ³£¬½øĞĞWSAStartup
+	WinSockInit socklibInit;//å¦‚æœä¸ºWindowsç³»ç»Ÿï¼Œè¿›è¡ŒWSAStartup
 #endif
 
-	int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);//½¨Á¢Ì×½Ó×Ö£¬Ê§°Ü·µ»Ø-1
+	int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);//å»ºç«‹å¥—æ¥å­—ï¼Œå¤±è´¥è¿”å›-1
 	sockaddr_in addr = { 0 };
-	addr.sin_family = AF_INET; //Ö¸¶¨µØÖ·×å
-	addr.sin_addr.s_addr = INADDR_ANY;//IP³õÊ¼»¯
-	addr.sin_port = htons(8090);//¶Ë¿ÚºÅ³õÊ¼»¯
+	addr.sin_family = AF_INET; //æŒ‡å®šåœ°å€æ—
+	addr.sin_addr.s_addr = INADDR_ANY;//IPåˆå§‹åŒ–
+	addr.sin_port = htons(8090);//ç«¯å£å·åˆå§‹åŒ–
 
 	int rc;
-	rc = bind(sock, (sockaddr*)& addr, sizeof(addr));//·ÖÅäIPºÍ¶Ë¿Ú
+	rc = bind(sock, (sockaddr*)& addr, sizeof(addr));//åˆ†é…IPå’Œç«¯å£
 
-	rc = listen(sock, 0);//ÉèÖÃ¼àÌı
+	rc = listen(sock, 0);//è®¾ç½®ç›‘å¬
 
-	//ÉèÖÃ¿Í»§¶Ë
+	//è®¾ç½®å®¢æˆ·ç«¯
 	sockaddr_in clientAddr;
 	int clientAddrSize = sizeof(clientAddr);
 	int clientSock;
-	//½ÓÊÜ¿Í»§¶ËÇëÇó
+	//æ¥å—å®¢æˆ·ç«¯è¯·æ±‚
 	while (-1 != (clientSock = accept(sock, (sockaddr*)& clientAddr, (socklen_t*)& clientAddrSize)))
 	{
-		// ÊÕÇëÇó
-		string requestStr;
-		int bufSize = 1024;
-		//int bufSize = 4096;
-		requestStr.resize(bufSize);
-		//½ÓÊÜÊı¾İ
-		recv(clientSock, &requestStr[0], bufSize, 0);
-		cout << "=========================http============================\n";
+		//HTTPè¯·æ±‚çš„æ•°æ®æŠ¥æ–‡
+		string requestStr = string();
+		//æ•°æ®æ€»é•¿åº¦
+		int total_length = 0;
+		//æ•°æ®ç¼“å†²åŒº
+		char buff[BUFF_SIZE] ;
+		//ä»recvç¼“å†²åŒºè¯»å–å‡ºçš„å®é™…æ•°æ®é•¿åº¦
+		int recv_length;
+		do {
+			recv_length = recv(clientSock, buff, sizeof(buff), 0);
+			if (SOCKET_ERROR == recv_length) {//è¿æ¥å¤±è´¥æ—¶è¿”å›SOCKET_ERROR
+				cout << "è¿æ¥å¤±è´¥" << endl;
+			}
+			else if (0 == recv_length) {//è¿æ¥ç»“æŸæ—¶è¿”å›0
+				cout << "è¿æ¥ç»“æŸ" << endl;
+			}
+			else {//æ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
+				requestStr.append(buff, 0, recv_length);
+				total_length += recv_length;
+			}
+		} while (recv_length >= BUFF_SIZE);//æ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦å°äºæ•°æ®ç¼“å†²åŒºçš„å¤§å°è¯´æ˜recvç¼“å†²åŒºé‡Œçš„æ•°æ®å·²ç»å¤åˆ¶å®Œäº†
 		cout << requestStr << endl;
-		cout << "=========================end============================\n";
-		//È¡µÃµÚÒ»ĞĞ
+		
+		//å–å¾—ç¬¬ä¸€è¡Œ
 		string firstLine = requestStr.substr(0, requestStr.find("\r\n"));
-		//È¡µÃURL
-		firstLine = firstLine.substr(firstLine.find(" ") + 1);//substr£¬¸´ÖÆº¯Êı£¬²ÎÊıÎªÆğÊ¼Î»ÖÃ£¨Ä¬ÈÏ0£©£¬¸´ÖÆµÄ×Ö·ûÊıÄ¿
-		string url = firstLine.substr(0, firstLine.find(" "));//find·µ»ØÕÒµ½µÄµÚÒ»¸öÆ¥Åä×Ö·û´®µÄÎ»ÖÃ£¬¶ø²»¹ÜÆäºóÊÇ·ñ»¹ÓĞÏàÆ¥ÅäµÄ×Ö·û´®¡£
+		//å–å¾—URL
+		firstLine = firstLine.substr(firstLine.find(" ") + 1);//substrï¼Œå¤åˆ¶å‡½æ•°ï¼Œå‚æ•°ä¸ºèµ·å§‹ä½ç½®ï¼ˆé»˜è®¤0ï¼‰ï¼Œå¤åˆ¶çš„å­—ç¬¦æ•°ç›®
+		string url = firstLine.substr(0, firstLine.find(" "));//findè¿”å›æ‰¾åˆ°çš„ç¬¬ä¸€ä¸ªåŒ¹é…å­—ç¬¦ä¸²çš„ä½ç½®ï¼Œè€Œä¸ç®¡å…¶åæ˜¯å¦è¿˜æœ‰ç›¸åŒ¹é…çš„å­—ç¬¦ä¸²ã€‚
 
-		//·¢ËÍÏìÓ¦Í·
+		//å‘é€å“åº”å¤´
 		string response =
 			"HTTP/1.1 200 OK\r\n"
 			"Content-Type: text/html; charset=gbk\r\n"
 			"Connection: close\r\n"
 			"\r\n";
 		send(clientSock, response.c_str(), response.length(), 0);
-		//´¦ÀíURL
+		//å¤„ç†URL
 		UrlRouter(clientSock, url);
 
-		close(clientSock);//¹Ø±Õ¿Í»§¶ËÌ×½Ó×Ö
+		close(clientSock);//å…³é—­å®¢æˆ·ç«¯å¥—æ¥å­—
 	}
 
-	close(sock);//¹Ø±Õ·şÎñÆ÷Ì×½Ó×Ö
+	close(sock);//å…³é—­æœåŠ¡å™¨å¥—æ¥å­—
 
 	return 0;
 }
