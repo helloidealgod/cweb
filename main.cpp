@@ -93,7 +93,7 @@ int main()
 		int recv_length;
 		do {
 			recv_length = recv(clientSock, buff, sizeof(buff), 0);
-			if (SOCKET_ERROR == recv_length) {//连接失败时返回SOCKET_ERROR
+			if (-1 == recv_length) {//连接失败时返回SOCKET_ERROR
 				cout << "连接失败" << endl;
 			}
 			else if (0 == recv_length) {//连接结束时返回0
